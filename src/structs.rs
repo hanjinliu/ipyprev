@@ -1,10 +1,51 @@
 use serde::{Deserialize, Serialize};
-use serde_json::{Value};
+use serde_json::Value;
 
+/*
+An .ipynb file is a json file in a format as following.
+
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": vector of strings
+    }
+   ],
+   "source": vector of strings
+  },
+  ...
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   ...
+   "version": "3.7.7"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
+*/
 
 #[derive(Serialize, Deserialize)]
-struct KernelInfo {
-    pub name: String,
+struct KernelSpec {
+    display_name: Option<String>,
+    language: Option<String>,
+    name: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -33,13 +74,14 @@ impl Cell {
 }
 
 #[derive(Serialize, Deserialize)]
-struct MetaData {
-    pub kernel_info: KernelInfo,
+pub struct MetaData {
+    kernelspec: KernelSpec,
+    language_info: LanguageInfo,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct NoteBook {
-    pub metadata: Value,
+    pub metadata: MetaData,
     pub nbformat: i32,
     pub nbformat_minor: i32,
     pub cells: Vec<Cell>,
