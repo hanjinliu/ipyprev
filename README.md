@@ -1,6 +1,7 @@
 # ipyprev
+=======
 
-A command line tool for previewing `.ipynb`.
+A CLI tool for ipynb preview.
 
 ```shell
 carge run path/to/notebook.ipynb
