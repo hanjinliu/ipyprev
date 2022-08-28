@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use syntect::easy::HighlightLines;
+use syntect::parsing::SyntaxSet;
+use syntect::highlighting::{ThemeSet, Style};
+use syntect::util::as_24_bit_terminal_escaped;
 
 /*
 An .ipynb file is a json file in a format as following.
@@ -88,11 +92,6 @@ impl Cell {
     }
 
     pub fn highlight(&self) -> String {
-        use syntect::easy::HighlightLines;
-        use syntect::parsing::SyntaxSet;
-        use syntect::highlighting::{ThemeSet, Style};
-        use syntect::util::as_24_bit_terminal_escaped;
-
         let mut result = String::new();
         
         let ps = SyntaxSet::load_defaults_newlines();
