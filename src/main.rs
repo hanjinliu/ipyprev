@@ -1,4 +1,5 @@
 pub mod structs;
+pub mod enums;
 use std::fs;
 use crate::structs::NoteBook;
 use structopt::StructOpt;

@@ -4,6 +4,7 @@ use syntect::easy::HighlightLines;
 use syntect::parsing::SyntaxSet;
 use syntect::highlighting::{ThemeSet, Style};
 use syntect::util::as_24_bit_terminal_escaped;
+use crate::enums::Language;
 
 /*
 An .ipynb file is a json file in a format as following.
@@ -45,30 +46,31 @@ An .ipynb file is a json file in a format as following.
 }
 */
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 struct KernelSpec {
     display_name: Option<String>,
     language: Option<String>,
     name: Option<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 struct LanguageInfo {
     pub name: String,
-    pub version: String,
-    pub codemirror_mode: Value,
+    pub version: Option<String>,
+    pub codemirror_mode: Option<Value>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Cell {
     pub cell_type: String,
     pub execution_count: Option<u64>,
-    pub metadata: Value,
+    pub metadata: Value,  // NOTE: Not Metadata type!
     pub outputs: Option<Value>,
     pub source: Vec<String>,
 }
 
 impl Cell {
+    // number of lines in the cell
     fn length(&self) -> usize {
         return self.source.len();
     }
@@ -111,12 +113,11 @@ impl Cell {
         };
         
         let mut hl = HighlightLines::new(syntax, &ts.themes["InspiredGitHub"]);
-        let digits = self.length().to_string().len();
 
         for (i, line) in self.source.iter().enumerate() {
             let ranges: Vec<(Style, &str)> = hl.highlight_line(line, &ps).unwrap();
             let escaped = as_24_bit_terminal_escaped(&ranges[..], false);
-            let s = format!("{:>2$}| {}", i, &escaped, digits);
+            let s = format!("{:>3}| {}", i + 1, &escaped);
             result.push_str(&s);
             result.push_str("\x1b[0m");  // clear formatting
         }
@@ -124,7 +125,7 @@ impl Cell {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct MetaData {
     kernelspec: KernelSpec,
     language_info: LanguageInfo,
@@ -139,21 +140,39 @@ pub struct NoteBook {
 }
 
 impl NoteBook {
+    const WIDTH: usize = 90;
+
     pub fn print(&self) {
-        let digits = self.cells.len().to_string().len();
         for (i, cell) in self.cells.iter().enumerate() {
-            println!("---[{:>1$}]---------------------------------------------------------", i, digits);
+            println!("---[{:>3}]---------------------------------------------------------", i + 1);
             cell.print();
             println!("----------------------------------------------------------------\n");
         }
     }
 
     pub fn print_highlight(&self) {
-        let digits = self.cells.len().to_string().len();
         for (i, cell) in self.cells.iter().enumerate() {
-            println!("---[{:>1$}]---------------------------------------------------------", i, digits);
+            let lang = match &*cell.cell_type {
+                "code" => self.get_language().to_str().to_string(),
+                _ => cell.cell_type.clone(),
+            };
+            let line0 = "-".to_string().repeat(NoteBook::WIDTH - 11);
+            let lang_cap = capitalize(&lang);
+            let line1 = "-".to_string().repeat(NoteBook::WIDTH - lang_cap.len() - 8);
+            println!("---+{}[{:>3}]--", line0, i + 1);
             println!("{}", cell.highlight());
-            println!("-------------------------------------------------------------<{}>--\n", cell.cell_type);
+            println!("---+{}<{}>--\n", line1, lang_cap);
         }
     }
+
+    fn get_language(&self) -> Language {
+        return match self.metadata.kernelspec.language {
+            Some(ref lang) => Language::from_str(lang),
+            None => Language::Unknown,
+        }
+    }
+}
+
+fn capitalize(s: &str) -> String {
+    s[0..1].to_uppercase() + &s[1..]
 }
