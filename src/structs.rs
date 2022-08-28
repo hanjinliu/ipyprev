@@ -157,7 +157,8 @@ impl NoteBook {
         }
     }
 
-    pub fn print_highlight(&self) {
+    // print all the notebook contents with syntax highlighting
+    pub fn print_highlight(&self, output: bool) {
         for (i, cell) in self.cells.iter().enumerate() {
             let lang = match &*cell.cell_type {
                 "code" => self.get_language().to_str().to_string(),
@@ -170,23 +171,18 @@ impl NoteBook {
             println!("{}", cell.highlight());
             println!("---+{}<{}>--\n", line1, lang_cap);
 
-            // output
-            match &cell.outputs {
-                Some(outputs) => {
-                    for output in outputs {
-                        if output.output_type == "stream" {
-                            match &output.text {
-                                Some(text) => {
-                                    for line in text.iter() {
-                                        print!("{}", line);
-                                    }
-                                }
-                                None => {}
+            // print output
+            if !output {continue;}
+            if let Some(outputs) = &cell.outputs {
+                for output in outputs {
+                    if output.output_type == "stream" {
+                        if let Some(text) = &output.text {
+                            for line in text.iter() {
+                                print!("{}", line);
                             }
                         }
                     }
                 }
-                None => {}
             }
         }
     }

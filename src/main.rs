@@ -8,8 +8,10 @@ use structopt::StructOpt;
 #[structopt(name="ipyprev", about="Preview an ipynb file.")]
 struct Opt {
     file: String,
-    #[structopt(short, long)]
+    #[structopt(long)]
     plain: bool,
+    #[structopt(long)]
+    no_output: bool,
 }
 
 impl Opt {
@@ -17,12 +19,13 @@ impl Opt {
         let opt = Self::from_args();
         let file = opt.file.clone();
         let plain = opt.plain;
+        let no_output = opt.no_output;
         let contents: String = fs::read_to_string(&file)?.parse()?;
         let notebook: NoteBook = serde_json::from_str(contents.as_str())?;
         if plain {
             notebook.print();
         } else {
-            notebook.print_highlight();
+            notebook.print_highlight(!no_output);
         }
         Ok(())
     }
