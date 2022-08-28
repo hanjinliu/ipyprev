@@ -47,26 +47,33 @@ An .ipynb file is a json file in a format as following.
 */
 
 #[derive(Serialize, Deserialize, Clone)]
-struct KernelSpec {
+pub struct KernelSpec {
     display_name: Option<String>,
     language: Option<String>,
     name: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
-struct LanguageInfo {
-    pub name: String,
-    pub version: Option<String>,
-    pub codemirror_mode: Option<Value>,
+pub struct LanguageInfo {
+    name: String,
+    version: Option<String>,
+    codemirror_mode: Option<Value>,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Output {
+    name: String,
+    output_type: String,
+    text: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Cell {
-    pub cell_type: String,
-    pub execution_count: Option<u64>,
-    pub metadata: Value,  // NOTE: Not Metadata type!
-    pub outputs: Option<Value>,
-    pub source: Vec<String>,
+    cell_type: String,
+    execution_count: Option<u64>,
+    metadata: Value,  // NOTE: Not Metadata type!
+    outputs: Option<Vec<Output>>,
+    source: Vec<String>,
 }
 
 impl Cell {
@@ -133,10 +140,10 @@ pub struct MetaData {
 
 #[derive(Serialize, Deserialize)]
 pub struct NoteBook {
-    pub metadata: MetaData,
-    pub nbformat: i32,
-    pub nbformat_minor: i32,
-    pub cells: Vec<Cell>,
+    metadata: MetaData,
+    nbformat: i32,
+    nbformat_minor: i32,
+    cells: Vec<Cell>,
 }
 
 impl NoteBook {
@@ -162,6 +169,25 @@ impl NoteBook {
             println!("---+{}[{:>3}]--", line0, i + 1);
             println!("{}", cell.highlight());
             println!("---+{}<{}>--\n", line1, lang_cap);
+
+            // output
+            match &cell.outputs {
+                Some(outputs) => {
+                    for output in outputs {
+                        if output.output_type == "stream" {
+                            match &output.text {
+                                Some(text) => {
+                                    for line in text.iter() {
+                                        print!("{}", line);
+                                    }
+                                }
+                                None => {}
+                            }
+                        }
+                    }
+                }
+                None => {}
+            }
         }
     }
 
