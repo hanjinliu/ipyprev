@@ -1,7 +1,9 @@
 # ipyprev
 
-A CLI tool for ipynb preview.
+A CLI tool for quick ipynb preview.
 
 ```shell
-carge run path/to/notebook.ipynb
+cargo run path/to/notebook.ipynb
 ```
+
+![](images/image-0.png)

@@ -138,6 +138,7 @@ pub struct MetaData {
     language_info: LanguageInfo,
 }
 
+// A ipynb is composed of cells and some metadata.
 #[derive(Serialize, Deserialize)]
 pub struct NoteBook {
     metadata: MetaData,
@@ -187,6 +188,8 @@ impl NoteBook {
         }
     }
 
+    // Get Language enum from the metadata of the notebook.
+    // This function usually returns such as Language.Python.
     fn get_language(&self) -> Language {
         return match self.metadata.kernelspec.language {
             Some(ref lang) => Language::from_str(lang),
@@ -195,6 +198,7 @@ impl NoteBook {
     }
 }
 
+// capitalize the first letter of a string
 fn capitalize(s: &str) -> String {
     s[0..1].to_uppercase() + &s[1..]
 }

@@ -7,10 +7,11 @@ use structopt::StructOpt;
 #[derive(Debug, StructOpt)]
 #[structopt(name="ipyprev", about="Preview an ipynb file.")]
 struct Opt {
+    #[structopt(help="The ipynb file to preview")]
     file: String,
-    #[structopt(long)]
+    #[structopt(long, help="Print without syntax highlighting")]
     plain: bool,
-    #[structopt(long)]
+    #[structopt(long, help="Do not show cell output")]
     no_output: bool,
 }
 
