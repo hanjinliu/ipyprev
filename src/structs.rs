@@ -55,14 +55,14 @@ pub struct KernelSpec {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct LanguageInfo {
-    name: String,
+    name: Option<String>,
     version: Option<String>,
     codemirror_mode: Option<Value>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Output {
-    name: String,
+    name: Option<String>,
     output_type: String,
     text: Option<Vec<String>>,
 }
